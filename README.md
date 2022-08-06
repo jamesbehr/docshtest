@@ -56,3 +56,9 @@ backticks).
 
 `--run-code-blocks`: Run code blocks. Code blocks are any bit of code indented
 with 4 spaces or a tab.
+
+## Docker
+You can use also run the CLI with Docker. The included Dockerfile provides a
+Debian-based image, which allows use of many standard GNU/Linux commands in the
+tests. It also sets up a user called `me`, and starts in that users home
+directory.
