@@ -16,10 +16,6 @@ type Test struct {
 	ExpectedOutput string
 }
 
-func (t Test) Empty() bool {
-	return t.Command == ""
-}
-
 var ErrInvalidTest = errors.New("shelltest: command output appeared before command")
 
 const prompt = "$ "
@@ -27,20 +23,24 @@ const prompt = "$ "
 func ParseTests(filename, source string, lineOffset int) ([]*Test, error) {
 	lines := strings.Split(source, "\n")
 
-	var current Test
+	var current *Test
 	var tests []*Test
 
 	for i, line := range lines {
 		if strings.HasPrefix(line, prompt) {
-			if !current.Empty() {
-				tests = append(tests, &current)
+			if current != nil {
+				tests = append(tests, current)
+				current = nil
 			}
 
-			current.Command = strings.TrimPrefix(line, prompt)
-			current.Filename = filename
-			current.Line = lineOffset + i
+			current = &Test{
+				Command:        strings.TrimPrefix(line, prompt),
+				ExpectedOutput: "",
+				Filename:       filename,
+				Line:           lineOffset + i,
+			}
 		} else {
-			if current.Empty() {
+			if current == nil {
 				return nil, ErrInvalidTest
 			}
 
@@ -52,8 +52,8 @@ func ParseTests(filename, source string, lineOffset int) ([]*Test, error) {
 		}
 	}
 
-	if !current.Empty() {
-		tests = append(tests, &current)
+	if current != nil {
+		tests = append(tests, current)
 	}
 
 	return tests, nil
